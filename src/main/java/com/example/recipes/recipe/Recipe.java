@@ -1,9 +1,10 @@
 package com.example.recipes.recipe;
 
-import com.example.recipes.model.BaseEntity;
+import com.example.recipes.user.User;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -14,21 +15,29 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "recipes")
+@Table(name = "RECIPES")
 @JsonView(RecipeJsonViews.InfoView.class)
-public class Recipe extends BaseEntity {
+public class Recipe {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView(RecipeJsonViews.IdOnlyView.class)
+    private long id;
 
     @NotBlank
+    @JsonView(RecipeJsonViews.CreateView.class)
     private String name;
 
     @NotBlank
+    @JsonView(RecipeJsonViews.CreateView.class)
     private String description;
 
     @NotBlank
+    @JsonView(RecipeJsonViews.CreateView.class)
     private String category;
 
     @LastModifiedDate
@@ -36,11 +45,19 @@ public class Recipe extends BaseEntity {
 
     @NotEmpty
     @ElementCollection
-    @Column(name = "ingredient")
+    @Column(name = "INGREDIENT")
+    @JsonView(RecipeJsonViews.CreateView.class)
     private List<String> ingredients;
 
     @NotEmpty
     @ElementCollection
-    @Column(name = "direction")
+    @Column(name = "DIRECTION")
+    @JsonView(RecipeJsonViews.CreateView.class)
     private List<String> directions;
+
+    @CreatedBy
+    @ManyToOne
+    @JoinColumn(name = "USER_ID")
+    @JsonView(RecipeJsonViews.PrivateView.class)
+    private User user;
 }

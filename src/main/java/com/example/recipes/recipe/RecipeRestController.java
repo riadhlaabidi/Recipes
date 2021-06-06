@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +30,7 @@ public class RecipeRestController {
 
     @JsonView(RecipeJsonViews.IdOnlyView.class)
     @PostMapping(value = "/new", consumes = APPLICATION_JSON_VALUE)
-    public Recipe newRecipe(@Valid @JsonView(RecipeJsonViews.InfoView.class)
+    public Recipe newRecipe(@Valid @JsonView(RecipeJsonViews.CreateView.class)
                             @RequestBody Recipe recipe) {
         return recipeService.add(recipe);
     }
@@ -42,12 +43,14 @@ public class RecipeRestController {
 
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("@recipeOwnershipEvaluator.isOwner(#id, principal)")
     public void deleteRecipe(@Min(1L) @PathVariable long id) {
         recipeService.delete(id);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("@recipeOwnershipEvaluator.isOwner(#id, principal)")
     public void updateRecipe(@PathVariable long id,
                              @Valid @RequestBody Recipe recipe) {
         recipeService.update(id, recipe);
